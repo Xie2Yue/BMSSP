@@ -478,13 +478,7 @@ class BBDLL {
 		
 		// 添加极小增量，使得 ret2 > all in ret1 and ret2 <= all not in ret1
 		if constexpr(std::is_same_v<T, Path<double> >) {
-			auto len = ret2.Vertices.size();
-			if(len == 0) {
-				ret2 += Path(0.0, 0);
-			}
-			else {
-				ret2.Vertices[len-1]++;
-			}
+			ret2.prev++;
 		}
 		
 		return {_size? ret2: Bound_, ret1};

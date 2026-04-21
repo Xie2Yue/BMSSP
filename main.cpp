@@ -4,12 +4,11 @@
 #include "BMSSP.h"
 #include <iostream>
 
-const double INF = 1e18;
 
 using namespace std;
 
 int main() {
 	BMSSPAlgo<double> A;
-	A.calc(10000, 20000, 2000.0, 0);
+	for(int i = 1; i <= 10; i ++) cout << A.calc(10000, 20000, 2000.0, 0).count()  << "ms\n";
 	return 0;
 }

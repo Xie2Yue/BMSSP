@@ -12,44 +12,25 @@ class Path {
 	private:
 	public:
 		T weight;
-		uint length;
-		std::vector<uint> Vertices;
+		uint length, prev;
 	public:
-		Path(T w): weight(w), length(0) {
-			Vertices.clear();
-		}
+		Path(T w): weight(w), length(0), prev(0) {}
+		Path(T w, uint p): weight(w), length(1), prev(p) {}
 		
-		template<typename... Args>
-		Path(T w, Args... vertices): weight(w) {
-			Vertices.clear();
-			((Vertices.push_back(vertices)), ...);
-			length = Vertices.size();
-		}
 		
 		bool operator < (const Path& t) const {
 			if(weight != t.weight) return weight < t.weight;
 			if(length != t.length) return length < t.length;
-			for(int i = 0; i < length; i ++) {
-				if(Vertices[i] != t.Vertices[i]) return Vertices[i] < t.Vertices[i];
-			}
-			return 0;
+			return prev < t.prev;
 		}
 		bool operator > (const Path& t) const {
 			if(weight != t.weight) return weight > t.weight;
 			if(length != t.length) return length > t.length;
-			for(int i = 0; i < length; i ++) {
-				if(Vertices[i] != t.Vertices[i]) return Vertices[i] > t.Vertices[i];
-			}
-			return 0;
+			return prev > t.prev;
 		}
 		
 		bool operator == (const Path& t) const {
-			if(weight != t.weight) return 0;
-			if(length != t.length) return 0;
-			for(int i = 0; i < length; i ++) {
-				if(Vertices[i] != t.Vertices[i]) return 0;
-			}
-			return 1;
+			return weight == t.weight && length == t.length && prev == t.prev;
 		}
 		
 		bool operator >= (const Path& t) const {
@@ -63,51 +44,21 @@ class Path {
 			Path ret = *this;
 			ret.weight += t.weight;
 			ret.length += t.length;
-			for(auto v: t.Vertices) {
-				ret.Vertices.push_back(v);
-			}
+			ret.prev = t.prev;
 			return ret;
 		}
 		Path& operator += (const Path& t) {
 			weight += t.weight;
 			length += t.length;
-			for(auto v: t.Vertices) {
-				Vertices.push_back(v);
-			}
+			prev = t.prev;
 			return *this;
 		}
 		
 		friend std::ostream& operator << (std::ostream &out, Path t) {
-			out << "<" << t.weight << ", " << t.length;
-			if(t.length > 0) {
-				out << ", [";
-				for(int i = 0; i < t.Vertices.size(); i ++) {
-					out << t.Vertices[i] << ((i == t.Vertices.size()-1) ? "]": ", ");
-				}	
-			}
-			out << ">";
+			out << "<" << t.weight << ", " << t.length << ", " << t.prev << ">";
 			return out;
 		}
 };
 
-
-//template<typename T>
-//struct std::formatter<Path<T> > {
-//	constexpr auto parse(std::format_parse_context& ctx) {
-//		return ctx.begin();
-//    }
-//	
-//    auto format(const Path<T>& t, std::format_context& ctx) const {
-//    	return std::format_to(ctx.out(), "{}", t.weight);
-//    	auto out = std::format_to(ctx.out(), "<{}, {}", t.weight, t.length);
-//    	if(t.length > 0) {
-//    		out = std::format_to(out, ", [");
-//    		for(int i = 0; i < t.Vertices.size(); i++) {
-//    			out = std::format_to(out, "{}{}", t.Vertices[i], ((i == t.Vertices.size()-1) ? "]": ", "));
-//			}
-//		}
-//		return std::format_to(out, ">");
-//    }
-//};
 
 #endif

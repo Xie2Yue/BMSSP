@@ -10,6 +10,8 @@
 #include <fstream>
 #include <format>
 #include <iomanip>
+#include <chrono>
+#include <ctime>
 
 #define uint unsigned int
 #define iinf 1e18
@@ -24,16 +26,16 @@ class BMSSPAlgo {
 	std::vector<uint> cnt, ft;
 	uint t, k, l;
 	
-	void calc(uint n, uint m, T B, uint s) {
-		std::cout << n << m <<"\n";
+	auto calc(uint n, uint m, T B, uint s) {
 		G.getRandomGraph(n, m);
 		G.getRandomEdgeWeight(B);
-		std::cout << "Graph!\n";
 		
-		std::ofstream fout("graph.bmssp2");
-		fout << std::fixed << std::setprecision(10) << G << "\n";
-		fout.close();
-		std::ofstream fans("ans.bmssp2");
+		auto start = std::chrono::steady_clock::now();
+		
+//		std::ofstream fout("graph.bmssp2");
+//		fout << std::fixed << std::setprecision(10) << G << "\n";
+//		fout.close();
+//		std::ofstream fans("ans.bmssp2");
 		
 		k = std::max(1u, (uint)floor(pow(log2(n), 1/3.0)));
 		t = std::max(1u, (uint)floor(pow(log2(n), 2/3.0)));
@@ -50,10 +52,14 @@ class BMSSPAlgo {
 		
 		BMSSP(l, iinf, S);
 		
-		fans << std::fixed << std::setprecision(10);
-		for(int i = 0; i < n; i ++) {
-			fans << i << " " << d[i].weight << "\n";
-		}
+		auto end = std::chrono::steady_clock::now();
+		
+		return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		
+//		fans << std::fixed << std::setprecision(10);
+//		for(int i = 0; i < n; i ++) {
+//			fans << i << " " << d[i].weight << "\n";
+//		}
 	}
 	
 	uint getfa(int x) {
