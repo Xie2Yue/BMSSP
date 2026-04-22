@@ -1,5 +1,6 @@
-a single-source shortest path algorithm code.
+一份单源最短路算法代码
 
-the algorithm is designed by Duan et al.
+算法由 Duan et al. 设计，发布在 https://arxiv.org/abs/2504.17033
 
-paper: https://arxiv.org/abs/2504.17033
+该算法具有 $O(m \log^{2/3} n)$ 的复杂度，但是为理论算法，具有较大的常数。
+
