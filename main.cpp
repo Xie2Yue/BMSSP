@@ -17,7 +17,8 @@ int main() {
 	
 	for(int tt = 0; tt < 13; tt++) {
 		n = a[tt];
-		m = n*10;
+//		m = n*10;
+		m = 10;
 		avgtB = 0, avgcuv = 0, avgtD = 0;
 
 		for(int i = 1; i <= t; i ++) {

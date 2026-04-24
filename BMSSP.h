@@ -26,7 +26,7 @@ class BMSSPAlgo {
 	uint t, k, l, cuv;
 	
 	auto calc(uint n, uint m, T B, uint s) {
-		G.getRandomGraph(n, m);
+		G.getRandomGraph2(n, m);
 		G.getRandomEdgeWeight(B);
 		cuv = 0;
 		

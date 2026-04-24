@@ -123,7 +123,7 @@ class Graph {
 		
 	}
 	
-	void getRandomGraph2(uint n, ull k) {
+	void getRandomGraph2(uint n, uint k) {
 		if(n <= 1 || k >= n) return;
 		
 		clear();
@@ -143,7 +143,7 @@ class Graph {
 					M.insert(i);
 					continue;
 				}
-				std::uniform_int_distribution<long long> dis(0, j - 1);
+				std::uniform_int_distribution<> dis(0, j - 1);
 				ull val = dis(gen);
 				
 				if(M.count(val)) {
