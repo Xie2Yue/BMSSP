@@ -209,36 +209,29 @@ class BBDLL {
 			));
 			link(nd->pre, t);
 			link(t, nd);
-//			std::cout << "break4-" << t->val << "\n";
 			cur = cur->nxt->nxt->nxt->nxt->nxt;
 			++m;
 		}
 		if(n%5 == 1) {
 			Node *t = new Node(0, cur->val);
-//			std::cout << "break4-" << t->val << "\n";
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 2) {
 			Node *t = new Node(0, std::min(cur->val, cur->nxt->val));
-//			std::cout << "break4-" << t->val << "\n";
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 3) {
 			Node *t = new Node(0, getMidium(cur->val, cur->nxt->val, cur->nxt->nxt->val));
-//			std::cout << "break4-" << t->val << "\n";
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 4) {
 			Node *t = new Node(0, getMidium(cur->val, cur->nxt->val,
 			cur->nxt->nxt->val, cur->nxt->nxt->nxt->val));
-//			std::cout << "break4-" << t->val << "\n";
 			link(nd->pre, t);
 			link(t, nd);
 		} else --m;
 		
-//		std::cout << "break5-in-" << m << "\n";
 		T mid = BFPRT(nd, m, m+1>>1)->val;
-//		std::cout << "break5-out-" << mid << "\n";
 		
 		for(Node* cur = nd->nxt; cur!= nd;) {
 			Node* now = cur;
@@ -247,20 +240,9 @@ class BBDLL {
 		}
 		delete nd;
 		
-//		for(Node* cur = dummy->nxt; cur != dummy;) {
-//			std::cout << "break6-" << cur->key << " " << cur->val << "\n";
-//			cur = cur->nxt;
-//		}
-		
 		Node* mid1 = partition(dummy->nxt, dummy, [mid](const Node& x){
 			return x.val < mid;
 		});
-		
-//		for(Node* cur = dummy->nxt; cur != dummy;) {
-//			std::cout << "break6-" << cur->key << " " << cur->val << "\n";
-//			cur = cur->nxt;
-//		}
-		
 		
 		if(uint d1 = dis(dummy, mid1) - 1; d1 >= k) {
 			Node* sd = new Node();
@@ -284,22 +266,9 @@ class BBDLL {
 				Node* m2p = mid2->pre;
 				link(sd, mid2);
 				link(dummy->pre, sd);
-//				for(Node* cur = sd->nxt; cur != sd;) {
-//					std::cout << "break7-" << cur->key << " " << cur->val << "\n";
-//					cur = cur->nxt;
-//				}
 				Node* rit = BFPRT(sd, n - d2, k - d2);
-//				for(Node* cur = sd->nxt; cur != sd;) {
-//					std::cout << "break7-" << cur->key << " " << cur->val << "\n";
-//					cur = cur->nxt;
-//				}
-//				std::cout << "break8-" << rit->key << " " << rit->val << "\n";
 				link(m2p, sd->nxt);
 				link(sd->pre, dummy);
-//				for(Node* cur = dummy->nxt; cur != dummy;) {
-//					std::cout << "break9-" << cur->key << " " << cur->val << "\n";
-//					cur = cur->nxt;
-//				}
 				delete(sd);
 				return rit;
 			}
@@ -416,7 +385,6 @@ class BBDLL {
 				Node *t = new Node(cur->key, cur->val);
 				link(nd->pre, t);
 				link(t, nd);
-//				std::cout << "break1-" << cur->key << " " << cur->val << "\n";
 				cur = cur->nxt;
 			}
 			if(c1 >= Mbs_) break;
@@ -429,7 +397,6 @@ class BBDLL {
 				Node *t = new Node(cur->key, cur->val);
 				link(nd->pre, t);
 				link(t, nd);
-//				std::cout << "break1-" << cur->key << " " << cur->val << "\n";
 				cur = cur->nxt;
 			}
 			if(c2 >= Mbs_) break;
@@ -439,12 +406,10 @@ class BBDLL {
 			delete nd;
 			return {0, {}};
 		}
-//		std::cout << "break3-" << c1 + c2 << "\n";
 		
 		Node* tar = BFPRT(nd, c1+c2, Mbs_);
 		
 		for(Node* cur = nd->nxt; cur != nd;) {
-//			std::cout << "break2-" << cur->key << " " << cur->val << "\n";
 			cur = cur->nxt;
 		}
 		
@@ -520,22 +485,6 @@ class BBDLL {
 
 };
 
-//template<typename T>
-//struct std::formatter<BBDLL<T> > {
-//	constexpr auto parse(std::format_parse_context& ctx) {
-//		return ctx.begin();
-//    }
-//	
-//    auto format(const BBDLL<T>& t, std::format_context& ctx) const {
-//    	auto out = std::format_to(ctx.out(), "<B = {}, M = {}, [", t.Bound_, t.Mbs_);
-//    	for(const auto& it: t.hash_) {
-//    		if(it.second->block != nullptr) {
-//    			out = std::format_to(out, "<key = {}, val = {}, id = {}> ", it.second->key, it.second->val, it.second->block->idx_);
-//			}
-//		}
-//		return std::format_to(out, "]>");
-//    }
-//};
 
 #undef uint
 

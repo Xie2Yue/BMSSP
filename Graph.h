@@ -81,7 +81,7 @@ class Graph {
 		E = idx_ = 0;
 	}
 	
-	void getRandomGraph(uint n, uint m) {
+	void getRandomGraph(uint n, ull m) {
 		
 		if(n <= 1) return;
 		if(m > n * (n - 1)) m = n * (n - 1);
@@ -89,21 +89,21 @@ class Graph {
 		
 		clear();
 		
-		std::set<uint>M;
+		std::set<ull>M;
 		static std::random_device rd;
 		static std::mt19937 gen(rd());
 		
-		for(int i = 0; i < n; ++i) {
+		for(uint i = 0; i < n; ++i) {
 			addVertex();
 		}
 		
-		for(int i = n * (n - 1) - m; i < n * (n - 1); ++i) {
+		for(ull i = n * (n - 1) - m; i < n * (n - 1); ++i) {
 			if( i <= 1) {
 				M.insert(i);
 				continue;
 			}
-			std::uniform_int_distribution<> dis(0, i - 1);
-			uint val = dis(gen);
+			std::uniform_int_distribution<long long> dis(0, i - 1);
+			ull val = dis(gen);
 			
 			if(M.count(val)) {
 				M.insert(i);
@@ -114,13 +114,48 @@ class Graph {
 		}
 		
 		for(const auto& pr: M) {
-			uint v = pr / (n - 1);
-			uint u = pr % (n - 1);
+			ull v = pr / (n - 1);
+			ull u = pr % (n - 1);
 			u += u >= v;
 			addEdge(u, v);
 			
 		}
 		
+	}
+	
+	void getRandomGraph2(uint n, ull k) {
+		if(n <= 1 || k >= n) return;
+		
+		clear();
+		
+		std::set<ull>M;
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		
+		for(uint i = 0; i < n; i ++) {
+			addVertex();
+		}
+		
+		for(uint i = 0; i < n; i ++) {
+			M.clear();
+			for(uint j = (n-1) - k; j < (n-1); j ++) {
+				if(j <= 1) {
+					M.insert(i);
+					continue;
+				}
+				std::uniform_int_distribution<long long> dis(0, j - 1);
+				ull val = dis(gen);
+				
+				if(M.count(val)) {
+					M.insert(i);
+				} else {
+					M.insert(val);
+				}
+			}
+			for(auto s: M) {
+				addEdge(i, s + (s>=i));
+			}
+		}
 	}
 
 	void getRandomEdgeWeight(T m) {

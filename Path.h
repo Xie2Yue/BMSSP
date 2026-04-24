@@ -32,6 +32,9 @@ class Path {
 		bool operator == (const Path& t) const {
 			return weight == t.weight && length == t.length && prev == t.prev;
 		}
+		bool operator != (const Path& t) const {
+			return weight != t.weight || length != t.length || prev != t.prev;
+		}
 		
 		bool operator >= (const Path& t) const {
 			return !(*this < t);

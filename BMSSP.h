@@ -15,7 +15,6 @@
 
 #define uint unsigned int
 #define iinf 1e18
-//#define iinf std::numeric_limits<T>::max()
 
 
 template<typename T = double>
@@ -24,18 +23,20 @@ class BMSSPAlgo {
 	Graph<T> G;
 	std::vector<Path<T> > d;
 	std::vector<uint> cnt, ft;
-	uint t, k, l;
+	uint t, k, l, cuv;
 	
 	auto calc(uint n, uint m, T B, uint s) {
 		G.getRandomGraph(n, m);
 		G.getRandomEdgeWeight(B);
+		cuv = 0;
 		
-		auto start = std::chrono::steady_clock::now();
 		
 //		std::ofstream fout("graph.bmssp2");
 //		fout << std::fixed << std::setprecision(10) << G << "\n";
 //		fout.close();
 //		std::ofstream fans("ans.bmssp2");
+
+		auto start1 = std::chrono::steady_clock::now();
 		
 		k = std::max(1u, (uint)floor(pow(log2(n), 1/3.0)));
 		t = std::max(1u, (uint)floor(pow(log2(n), 2/3.0)));
@@ -48,18 +49,33 @@ class BMSSPAlgo {
 		l = ceil(log2(n) / t);
 		std::set<uint>S({s});
 		
-//		std::cout << std::format("calc that k = {}, t = {}, l = {}\n", k, t, l); fmo.dep == 0;
 		
 		BMSSP(l, iinf, S);
 		
-		auto end = std::chrono::steady_clock::now();
+		auto end1 = std::chrono::steady_clock::now();
 		
-		return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 		
 //		fans << std::fixed << std::setprecision(10);
-//		for(int i = 0; i < n; i ++) {
+		for(int i = 0; i < n; i ++) {
 //			fans << i << " " << d[i].weight << "\n";
+			cuv += d[i].weight != iinf;
+		}
+		auto start2 = std::chrono::steady_clock::now();
+		
+		d.assign(n, iinf);
+		d[s] = 0;
+		
+		dijkstra(s);
+		
+		auto end2 = std::chrono::steady_clock::now();
+		
+//		for(int i = 0; i < n; i ++) {
+//			if(d2[i] != d[i]) std::cout << "e";
 //		}
+		
+		return make_tuple(
+			std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1),
+			std::chrono::duration_cast<std::chrono::microseconds>(end2 - start2), cuv);
 	}
 	
 	uint getfa(int x) {
@@ -157,100 +173,74 @@ class BMSSPAlgo {
 		
 		if(l == 0) return BaseCase(B, S);
 		
-//		std::cout << std::format("{}BMSSP(l = {}, B = {}, S = {}) {{\n", fmo, l, B, S);
-//		fmo.dep++;
-		
-//		std::cout << std::format("{}[P, W] = FindPivots(B = {}, S = {}) {{\n", fmo, B, S);
-//		fmo.dep++;
 		auto [P, W] = FindPivots(B, S);
-//		fmo.dep--;
-//		std::cout << std::format("{}}}\n{}so P = {}, W = {}\n", fmo, fmo, P, W);
 		
 		auto M = 1ll<<((l-1)*t);
-//		std::cout << std::format("{}M = {}\n", fmo, M);
 		
 		BBDLL<Path<T>> D(B, M);
-//		std::cout << std::format("{}D = BBDLL(B = {}, M = {})\n", fmo, B, M);
 		
-//		std::cout << std::format("{}D.insert(P = {}) {{\n", fmo, P);
-//		fmo.dep++;
 		for(auto x: P) {
 			D.insert(x, d[x]);
 		}
-//		fmo.dep--;
-//		std::cout << std::format("{}}} so D = {}\n", fmo, D);
 		
 		std::set<uint>U;		
 		int i = 0;
 		Path<T> Bpi = B;
 		
-//		std::cout << std::format("{}i = {}, U = {}, Bpi = {}\n", fmo, i, U, Bpi);
-		
-//		std::cout << std::format("{} while(|U| < k*2^(lt) && |D| > 0) {{\n", fmo); fmo.dep++;
 		while(U.size() < k * (1ll<<(l*t)) && D.size()>0) {
-//			std::cout << std::format("{}because |U| = {} < k*2^(lt) = {} && |D| = {} > 0\n{} so {{\n", fmo, U.size(), k * (1ll<<(l*t)), D.size(), fmo); fmo.dep++;
-				
-//				std::cout << std::format("{}D = {}", fmo, D);
 				auto [Bi, Si] = D.pull();
-//				std::cout << std::format("{}[Bi, Si] = D.pull()\n{}Bi = {}, Si = {}\n{}D = {}\n", fmo, fmo, Bi, Si, fmo, D);
 				auto [Bipi, Ui] = BMSSP(l-1, Bi, Si);
-//				std::cout << std::format("{}[Bipi, Ui] = BMSSP(l-1 = {}, Bi = {}, Si = {}) = [{}, {}]\n", fmo, l-1, Bi, Si, Bipi, Ui);
 				
 				std::set<std::pair<uint, Path<T> > >K;
-//				std::cout << std::format("{}K = {}\n", fmo, K);
 				
-//				std::cout << std::format("{}for edge[u, v, w] in Ui{{\n", fmo); fmo.dep++;
 				for(const auto& u: Ui) {
-					U.insert(u);// U cup Ui
+					U.insert(u);
 					for(const auto& [v, w]: G.getVertex(u).getEdge()) {
-//						std::cout << std::format("{}[u, v, w] = [{}, {}, {}]: {{\n", fmo, u, v, w); fmo.dep++;
-//						std::cout << std::format("{}d[u] = {},d[u] + Path(w, v) = {}, d[v] = {}\n{}Bi = {}, B = {}\n", fmo, d[u], d[u] + Path(w, v), d[v], fmo, Bi, B);
 						if(d[u] + Path(w, v) <= d[v]) {
 							d[v] = d[u] + Path(w, v);
 							if(d[v] >= Bi && d[v] < B) {
-//								std::cout << std::format("{}D.insert(v = {}, d[v] = {})\n", fmo, v, d[v]);
 								D.insert(v, d[v]);
 							}
 							else if(d[v] >= Bipi && d[v] < Bi) {
-//								std::cout << std::format("{}K.insert(v = {}, d[v] = {})\n", fmo, v, d[v]);
 								K.insert({v, d[v]});
 							}
 						}
-//						fmo.dep--; std::cout << std::format("{}}}\n", fmo);
 					}
 				}
-//				fmo.dep--; std::cout << std::format("{}}}\n", fmo);
-				
-//				std::cout << std::format("{}K cup= Si(s | Bipi <= d[s] < Bi); Si = {}, K = {}, Bipi = {}, Bi = {}\n", fmo, Si, K, Bipi, Bi); fmo.dep++;
 				for(auto s: Si) {
 					if(d[s] >= Bipi && d[s] < Bi) {
 						K.insert({s, d[s]});
-//						std::cout << std::format("{}s = {}, d[s] = {}, Bipi = {}, Bi = {}\n", fmo, s, d[s], Bipi, Bi);
 					}
 				}
-//				fmo.dep--;
 				
 				D.batchPrepend(K);
-//				std::cout << std::format("{}D.batchPrepend(K = {})\n{}so D = {}", fmo, K, fmo, D);
-				
 				
 				Bpi = std::min(Bpi, Bipi);
-			
-//			fmo.dep--; std::cout << std::format("{}}}\n", fmo);
 		}
-//		fmo.dep--; std::cout << std::format("{}}}\n", fmo);
 		
 		for(auto x: W) {
 			if(d[x] < Bpi) U.insert(x);
 		}
 		
-//		std::cout << std::format("{}return Bpi = {}, U = {}\n", fmo, Bpi, U);
-//		fmo.dep--;
-//		std::cout << std::format("{}{{\n", fmo);
 		return {Bpi, U};
 	}
 	
-	
+	void dijkstra(uint s) {
+		std::priority_queue<pptui> q;
+		
+		q.emplace(d[s], s);
+		while(!q.empty()) {
+			auto [dis, u] = q.top();
+			q.pop();
+			if(d[u] < dis) continue;
+			for(auto [v, w]: G.getVertex(u).getEdge()) {
+				if(d[u] + Path(w, v) < d[v]) {
+					d[v] = d[u] + Path(w, v);
+					q.emplace(d[v], v);
+				}
+			}
+		}
+	}
 	
 };
 
