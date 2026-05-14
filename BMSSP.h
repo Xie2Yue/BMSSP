@@ -3,7 +3,7 @@
 
 #include "Graph.h"
 #include "Path.h"
-#include "BBDLL.h"
+#include "testbbdll.h"
 #include <queue>
 #include <cmath>
 #include <limits>
@@ -26,7 +26,7 @@ class BMSSPAlgo {
 	uint t, k, l, cuv;
 	
 	auto calc(uint n, uint m, T B, uint s) {
-		G.getRandomGraph2(n, m);
+		G.getRandomGraph(n, m);
 		G.getRandomEdgeWeight(B);
 		cuv = 0;
 		
@@ -68,10 +68,6 @@ class BMSSPAlgo {
 		dijkstra(s);
 		
 		auto end2 = std::chrono::steady_clock::now();
-		
-//		for(int i = 0; i < n; i ++) {
-//			if(d2[i] != d[i]) std::cout << "e";
-//		}
 		
 		return make_tuple(
 			std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1),
@@ -172,6 +168,10 @@ class BMSSPAlgo {
 	std::pair<Path<T>, std::set<uint> > BMSSP(uint l,const Path<T>& B,const std::set<uint>& S) {
 		
 		if(l == 0) return BaseCase(B, S);
+
+//		std::cout << "l = " << l << ", B = " << B << ", |S| = " << S.size() << "\n";
+		
+//		int temp; std::cin >> temp;
 		
 		auto [P, W] = FindPivots(B, S);
 		
@@ -188,8 +188,27 @@ class BMSSPAlgo {
 		Path<T> Bpi = B;
 		
 		while(U.size() < k * (1ll<<(l*t)) && D.size()>0) {
+			
+//				D.print();
+			
 				auto [Bi, Si] = D.pull();
+
+				
+				
+//				std::cout << "{";
+//				for(auto u: Si) {
+//					std::cout << u << " ";
+//				}
+//				std::cout << "}\n";
+				 
+//				D.print();
+				
+//				std::cout << "------------------------\n\n\n\n\n";
+				
+
 				auto [Bipi, Ui] = BMSSP(l-1, Bi, Si);
+				
+//				std::cout << "break3\n";
 				
 				std::set<std::pair<uint, Path<T> > >K;
 				
@@ -199,14 +218,22 @@ class BMSSPAlgo {
 						if(d[u] + Path(w, v) <= d[v]) {
 							d[v] = d[u] + Path(w, v);
 							if(d[v] >= Bi && d[v] < B) {
+//								std::cout << "break5-1 : " << v << " " << d[v] << "\n";
 								D.insert(v, d[v]);
+//								std::cout << "end break5-1\n";
 							}
 							else if(d[v] >= Bipi && d[v] < Bi) {
+								
+//								std::cout << "break5-2 : " << v << " " << d[v] << "\n";
 								K.insert({v, d[v]});
+//								std::cout << "end break5-2\n";
 							}
 						}
 					}
 				}
+				
+//				std::cout << "Break4\n";
+				
 				for(auto s: Si) {
 					if(d[s] >= Bipi && d[s] < Bi) {
 						K.insert({s, d[s]});
@@ -216,6 +243,8 @@ class BMSSPAlgo {
 				D.batchPrepend(K);
 				
 				Bpi = std::min(Bpi, Bipi);
+				
+//				std::cout << "break2\n";
 		}
 		
 		for(auto x: W) {

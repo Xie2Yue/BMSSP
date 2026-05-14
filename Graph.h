@@ -81,7 +81,7 @@ class Graph {
 		E = idx_ = 0;
 	}
 	
-	void getRandomGraph(uint n, ull m) {
+	void getRandomGraph(ull n, ull m) {
 		
 		if(n <= 1) return;
 		if(m > n * (n - 1)) m = n * (n - 1);
@@ -91,7 +91,7 @@ class Graph {
 		
 		std::set<ull>M;
 		static std::random_device rd;
-		static std::mt19937 gen(rd());
+		static std::mt19937_64 gen(rd());
 		
 		for(uint i = 0; i < n; ++i) {
 			addVertex();
