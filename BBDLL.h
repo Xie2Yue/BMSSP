@@ -45,16 +45,16 @@ class BBDLL {
 	
 	class Block;// 前向声明
 	
-	class Node{
+	class Pkv{
 		public:
 		uint key;
 		T val;
 		Block *block;
-		Node *pre, *nxt;
-		Node (uint k = 0, T v = 0, Block *b = nullptr, Node *p = nullptr, Node *n = nullptr):
+		Pkv *pre, *nxt;
+		Pkv (uint k = 0, T v = 0, Block *b = nullptr, Pkv *p = nullptr, Pkv *n = nullptr):
 			key(k), val(v), block(b), pre(p), nxt(n) {}
 		
-		bool operator < (const Node& t) const { return val < t.val; }
+		bool operator < (const Pkv& t) const { return val < t.val; }
 	};
 	
 	class Block {
@@ -64,14 +64,14 @@ class BBDLL {
 		T bound_;
 		uint idx_;
 		uint size_;
-		Node *dummy;	
+		Pkv *dummy;	
 			
 		Block(T bound = 0, bool mode = 0) : bound_(bound), idx_(counter_++), size_(0), mode_(mode) {
-			dummy = new Node();
+			dummy = new Pkv();
 			dummy->pre = dummy->nxt = dummy;
 		}
-		Block(T bound, Node* d, bool mode = 0): bound_(bound), idx_(counter_++), size_(0), dummy(d), mode_(mode) {
-			for(Node* cur = dummy->nxt;cur != dummy; cur = cur->nxt) {
+		Block(T bound, Pkv* d, bool mode = 0): bound_(bound), idx_(counter_++), size_(0), dummy(d), mode_(mode) {
+			for(Pkv* cur = dummy->nxt;cur != dummy; cur = cur->nxt) {
 				cur->block = this;
 				++size_;
 			}
@@ -85,14 +85,14 @@ class BBDLL {
 			return bound_ == b.bound_ ? idx_ < b.idx_ : bound_ < b.bound_;
 		}
 		
-		Node* insert(uint k, const T& v) {
+		Pkv* insert(uint k, const T& v) {
 			++size_;
-			Node *ins = new Node(k, v, this);
+			Pkv *ins = new Pkv(k, v, this);
 			link(dummy->pre, ins);
 			link(ins, dummy);
 			return ins;
 		}
-		Node* insert (Node* ptr, const T& v) {
+		Pkv* insert (Pkv* ptr, const T& v) {
 			++size_;
 			ptr->val = v;
 			ptr->block = this;
@@ -101,8 +101,8 @@ class BBDLL {
 			return ptr;
 		}
 		std::unique_ptr<Block> split(bool mode = 0) {
-			Node* nd = new Node();
-			Node* pos = BFPRT(dummy, size_, size_+1>>1);
+			Pkv* nd = new Pkv();
+			Pkv* pos = BFPRT(dummy, size_, size_+1>>1);
 			link(nd, dummy->nxt);
 			link(dummy, pos->nxt);
 			link(pos, nd);
@@ -139,7 +139,7 @@ class BBDLL {
 	T Bound_;
 	uint Mbs_;
 	uint _size;
-	std::unordered_map<uint, Node*>hash_;
+	std::unordered_map<uint, Pkv*>K;
 	std::set<std::unique_ptr<Block>, BlockCompare> D1;
 	std::vector<std::unique_ptr<Block> > D0;
 	private:
@@ -149,16 +149,16 @@ class BBDLL {
 		_size = 0;
 	}
 	
-	static void link(Node *a, Node* b){
+	static void link(Pkv *a, Pkv* b){
 		a->nxt = b;
 		b->pre = a;
 	}
 	
-	static Node* partition(Node* begin, const Node* end, std::function<bool(const Node&)>cmp) {
-		Node* pre = begin->pre;
-		Node* dummy = new Node();
+	static Pkv* partition(Pkv* begin, const Pkv* end, std::function<bool(const Pkv&)>cmp) {
+		Pkv* pre = begin->pre;
+		Pkv* dummy = new Pkv();
 		dummy->pre = dummy->nxt = dummy;
-		for(Node* it = begin; it != end;) {
+		for(Pkv* it = begin; it != end;) {
 			if(cmp(*it)) {
 				if(it == begin) begin = begin->nxt;
 				link(it->pre, it->nxt);
@@ -178,7 +178,7 @@ class BBDLL {
 		}
 	}
 	
-	static uint dis(Node* st, const Node* ed) {
+	static uint dis(Pkv* st, const Pkv* ed) {
 		uint ret = 0;
 		while(st != ed) {
 			++ret;
@@ -187,7 +187,7 @@ class BBDLL {
 		return ret;
 	}
 	
-	static Node* getNext(Node* st, uint k = 1) {
+	static Pkv* getNext(Pkv* st, uint k = 1) {
 		for(int i = 0; i < k; ++i) {
 			st = st->nxt;
 		}
@@ -195,15 +195,15 @@ class BBDLL {
 	}
 	
 	
-	static Node* BFPRT(Node* dummy, uint n, uint k) {
+	static Pkv* BFPRT(Pkv* dummy, uint n, uint k) {
 		if(n == 1){ return dummy->nxt; }
 		if(k > n) { k = n; }
-		Node*nd = new Node();
+		Pkv*nd = new Pkv();
 		nd->pre = nd->nxt = nd;
-		Node* cur = dummy->nxt;
+		Pkv* cur = dummy->nxt;
 		uint m = 1;
 		for(int i = 1; i <= n/5; ++i) {
-			Node *t = new Node(0, getMidium(
+			Pkv *t = new Pkv(0, getMidium(
 				cur->val, cur->nxt->val, cur->nxt->nxt->val,
 				cur->nxt->nxt->nxt->val, cur->nxt->nxt->nxt->nxt->val
 			));
@@ -213,19 +213,19 @@ class BBDLL {
 			++m;
 		}
 		if(n%5 == 1) {
-			Node *t = new Node(0, cur->val);
+			Pkv *t = new Pkv(0, cur->val);
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 2) {
-			Node *t = new Node(0, std::min(cur->val, cur->nxt->val));
+			Pkv *t = new Pkv(0, std::min(cur->val, cur->nxt->val));
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 3) {
-			Node *t = new Node(0, getMidium(cur->val, cur->nxt->val, cur->nxt->nxt->val));
+			Pkv *t = new Pkv(0, getMidium(cur->val, cur->nxt->val, cur->nxt->nxt->val));
 			link(nd->pre, t);
 			link(t, nd);
 		} else if(n%5 == 4) {
-			Node *t = new Node(0, getMidium(cur->val, cur->nxt->val,
+			Pkv *t = new Pkv(0, getMidium(cur->val, cur->nxt->val,
 			cur->nxt->nxt->val, cur->nxt->nxt->nxt->val));
 			link(nd->pre, t);
 			link(t, nd);
@@ -233,40 +233,40 @@ class BBDLL {
 		
 		T mid = BFPRT(nd, m, m+1>>1)->val;
 		
-		for(Node* cur = nd->nxt; cur!= nd;) {
-			Node* now = cur;
+		for(Pkv* cur = nd->nxt; cur!= nd;) {
+			Pkv* now = cur;
 			cur = cur->nxt;
 			delete now;
 		}
 		delete nd;
 		
-		Node* mid1 = partition(dummy->nxt, dummy, [mid](const Node& x){
+		Pkv* mid1 = partition(dummy->nxt, dummy, [mid](const Pkv& x){
 			return x.val < mid;
 		});
 		
 		if(uint d1 = dis(dummy, mid1) - 1; d1 >= k) {
-			Node* sd = new Node();
+			Pkv* sd = new Pkv();
 			link(sd, dummy->nxt);
 			link(mid1->pre, sd);
-			Node* rit = BFPRT(sd, d1, k);
+			Pkv* rit = BFPRT(sd, d1, k);
 			link(dummy, sd->nxt);
 			link(sd->pre, mid1);
 			delete sd;
 			return rit;
 		} else {
-			Node* l2 = mid1->pre;
-			Node* mid2 = partition(mid1, dummy, [mid](const Node& x){
+			Pkv* l2 = mid1->pre;
+			Pkv* mid2 = partition(mid1, dummy, [mid](const Pkv& x){
 				return x.val <= mid;
 			});
 			mid1 = l2->nxt;
 			if(auto d2 = d1 + dis(mid1, mid2); d2 >= k) {
 				return getNext(mid1, k -d1 - 1);
 			} else {
-				Node* sd = new Node();
-				Node* m2p = mid2->pre;
+				Pkv* sd = new Pkv();
+				Pkv* m2p = mid2->pre;
 				link(sd, mid2);
 				link(dummy->pre, sd);
-				Node* rit = BFPRT(sd, n - d2, k - d2);
+				Pkv* rit = BFPRT(sd, n - d2, k - d2);
 				link(m2p, sd->nxt);
 				link(sd->pre, dummy);
 				delete(sd);
@@ -279,7 +279,7 @@ class BBDLL {
 	BBDLL (const T& bound, uint mbs): Bound_(bound), Mbs_(mbs) { init(); }
 	
 	~BBDLL() {
-		for(auto& it : hash_) {
+		for(auto& it : K) {
 			delete it.second;
 		}
 	}
@@ -290,7 +290,7 @@ class BBDLL {
 	
 	void insert(uint k, const T& v) {
 		++ _size;
-		if(auto it = hash_.find(k); it != hash_.end()) {
+		if(auto it = K.find(k); it != K.end()) {
 			if(v >= it->second->val && it->second->block != nullptr) {
 				-- _size;
 				return;
@@ -315,18 +315,18 @@ class BBDLL {
 			if(block->get()->size_>Mbs_) D1.emplace(std::move(block->get()->split(1)));
 		} else {
 			auto block = D1.lower_bound(v);
-			hash_[k] = block->get()->insert(k, v);
+			K[k] = block->get()->insert(k, v);
 			if(block->get()->size_>Mbs_) D1.emplace(std::move(block->get()->split(1)));
 		}
 	}
 	
 	void batchPrepend(std::set<std::pair<uint, T> >data) {
 		T bound = 0;
-		Node *nd = new Node();
+		Pkv *nd = new Pkv();
 		nd->pre = nd->nxt = nd;
 		for(auto [k, v] : data) {
 			++ _size;
-			if(auto it = hash_.find(k); it != hash_.end()) {
+			if(auto it = K.find(k); it != K.end()) {
 
 				if(it->second->block != nullptr) {
 					-- _size;
@@ -346,10 +346,10 @@ class BBDLL {
 				link(it->second, nd);
 				it->second->val = v;
 			} else {
-				Node *node = new Node(k, v);
+				Pkv *node = new Pkv(k, v);
 				link(nd->pre, node);
 				link(node, nd);
-				hash_[k] = node;
+				K[k] = node;
 			}
 			bound = std::max(bound, v);
 		}
@@ -368,7 +368,7 @@ class BBDLL {
 	
 	std::pair<T, std::set<uint> > pull() {
 		uint c1 = 0, c2 = 0;
-		Node* nd = new Node();
+		Pkv* nd = new Pkv();
 		nd->pre = nd->nxt = nd;
 		
 		D0.erase(
@@ -381,8 +381,8 @@ class BBDLL {
 		for(int i = D0.size() - 1; i >= 0; --i) {
 			auto& block = D0[i];
 			c1 += block->size_;
-			for(Node* cur = block->dummy->nxt; cur!= block->dummy;) {
-				Node *t = new Node(cur->key, cur->val);
+			for(Pkv* cur = block->dummy->nxt; cur!= block->dummy;) {
+				Pkv *t = new Pkv(cur->key, cur->val);
 				link(nd->pre, t);
 				link(t, nd);
 				cur = cur->nxt;
@@ -393,8 +393,8 @@ class BBDLL {
 		
 		for(const auto& block : D1) {
 			c2 += block->size_;
-			for(Node* cur = block->dummy->nxt; cur!= block->dummy;) {
-				Node *t = new Node(cur->key, cur->val);
+			for(Pkv* cur = block->dummy->nxt; cur!= block->dummy;) {
+				Pkv *t = new Pkv(cur->key, cur->val);
 				link(nd->pre, t);
 				link(t, nd);
 				cur = cur->nxt;
@@ -407,20 +407,20 @@ class BBDLL {
 			return {0, {}};
 		}
 		
-		Node* tar = BFPRT(nd, c1+c2, Mbs_);
+		Pkv* tar = BFPRT(nd, c1+c2, Mbs_);
 		
-		for(Node* cur = nd->nxt; cur != nd;) {
+		for(Pkv* cur = nd->nxt; cur != nd;) {
 			cur = cur->nxt;
 		}
 		
 		std::set<uint>ret1;
 		T ret2 = tar->val;
 		bool flag = 1;
-		for(Node* cur = nd->nxt; cur != nd;) {
-			Node* now = cur;
+		for(Pkv* cur = nd->nxt; cur != nd;) {
+			Pkv* now = cur;
 			if(flag) {
 				ret1.insert(cur->key);
-				auto it = hash_.find(cur->key);
+				auto it = K.find(cur->key);
 				link(it->second->pre, it->second->nxt);
 				-- it->second->block->size_;
 				if(it->second->pre == it->second->nxt) {
@@ -450,7 +450,7 @@ class BBDLL {
 	}
 	
 	void print() {
-		for(const auto& it : hash_) {
+		for(const auto& it : K) {
 			if(it.second->block == nullptr) std::cout<<"<"<<it.second->key<<" is pulled> ";
 			else std::cout<<"<"<<it.second->key<<", "<<it.second->val<<", "<<it.second->block->idx_<<"> ";
 		}std::cout<<"\n\n";
